@@ -1,0 +1,246 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+model User{
+  id                      String  @id @default(uuid())
+  username                String  @unique
+  email                   String  @unique
+  firstName   String
+  lastName    String
+  phoneNumber String
+  gender      Gender
+  profilePicURL           String?
+  bio                     String
+  emailVerified           Boolean @default(false)
+  isEmailVerified         Boolean   @default(false)
+  forgotPasswordExpiry    DateTime?
+  emailVerificationToken  String?
+  emailVerificationExpiry DateTime?
+  
+  memberships             GroupMembers[]
+  clubMemberships         ClubMembers[]
+  posts                   Post[] 
+  groupAdmin              GroupAdmin[]
+  clubAdmin               ClubAdmin[] 
+  Like        Like[]
+  Comment     Comment[]  
+  events                  Event[] 
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Group{
+  id             String  @id @default(uuid())
+  name           String  @unique
+  description    String?
+  groupURL       String?
+   
+
+  categories     GroupCategory[]
+  members        GroupMembers[]
+  admins         GroupAdmin[]
+  posts          Post[]    
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model GroupCategory {
+  groupId      String
+  categoryId   String
+  addedAt      DateTime          @default(now())
+
+  group        Group             @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category     Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, categoryId])    
+  @@map("group_categories")
+}
+
+model GroupMembers{
+  id          String  @id @default(uuid())
+  userId      String
+  groupId     String
+  joinedAt    DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id],onDelete: Cascade)
+  group       Group    @relation(fields: [groupId], references: [id],onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model GroupAdmin{
+  id       String     @id @default(uuid())
+  userId   String
+  groupId  String
+  addedAt  DateTime   @default(now())
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group    Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_admins")
+}
+
+
+
+model Club {
+  id            String   @id @default(uuid())  
+  name          String   @unique              
+  description   String?                            
+  coverImage    String?                        
+  bannerURL     String?
+  
+
+  categories    ClubCategory[]
+  members       ClubMembers[] 
+  posts         Post[]      
+  admins        ClubAdmin[]
+
+              
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+}
+
+model Category {
+  id           String            @id @default(uuid())
+  name         String            @unique
+  description  String?
+  createdAt    DateTime          @default(now())
+
+  groups       GroupCategory[]   
+  clubs        ClubCategory[]
+  @@map("categories")
+}
+
+model ClubCategory{
+  clubId  String
+  categoryId  String
+  addedAt      DateTime          @default(now())
+
+  club       Club   @relation(fields: [clubId],references: [id],onDelete: Cascade)
+  category     Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([clubId, categoryId])    
+  @@map("club_categories")
+}
+
+model ClubMembers {
+  id       String   @id @default(uuid())      
+  userId   String                             
+  clubId   String                             
+  joinedAt DateTime @default(now())           
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, clubId])                  
+  @@map("club_members")
+}
+
+model ClubAdmin{
+  id       String     @id @default(uuid())
+  userId   String
+  clubId  String
+  addedAt  DateTime   @default(now())
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club    Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clubId])
+  @@map("club_admins")
+}
+
+model Like {
+  id     String @id @default(uuid())
+  postId String
+  userId String
+  post   Post   @relation(fields: [postId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("likes")
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  postId  String
+  userId  String
+  comment String
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  content     String
+  imageUrl    String? 
+  createdAt   DateTime  @default(now())
+  userId      String
+  groupId     String? // Optional foreign key for Group
+  clubId      String? // Optional foreign key for Club
+  user        User      @relation(fields: [userId], references: [id])
+  group       Group?    @relation(fields: [groupId], references: [id])
+  club        Club?     @relation(fields: [clubId], references: [id])
+   Like        Like[]
+  Comment     Comment[]
+
+  @@map("posts")
+}
+
+model Event {
+  id            String     @id @default(uuid())
+  eventName     String
+  description   String?
+  date          DateTime
+  location      String
+  fromTime      DateTime
+  toTime        DateTime
+  eventImageURL String?
+  userId        String
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rsvps         RSVP[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("events")
+}
+
+model RSVP {
+  id        String    @id @default(uuid())
+  eventId   String
+  userIds   String[]  // Array of user IDs who RSVP'd to this event
+
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime  @default(now())
+  
+  @@map("rsvps")
+}
+
