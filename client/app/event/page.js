@@ -85,13 +85,13 @@ const CreateEventForm = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const userId = localStorage.getItem("userID");
+      const userId = localStorage.getItem("userId");
       if (!userId) {
         throw new Error("User not authenticated");
       }
 
       const response = await axios.get("http://localhost:3001/api/event/", {
-        headers: { userid: userId },
+        headers: { userId: userId },
       });
       setEvents(response.data.events);
     } catch (err) {
@@ -144,7 +144,7 @@ const CreateEventForm = () => {
     setError("");
     setIsSuccess(false);
 
-    const userId = localStorage.getItem("userID");
+    const userId = localStorage.getItem("userId");
     if (!userId) {
       setError("User not authenticated");
       return;
@@ -159,7 +159,7 @@ const CreateEventForm = () => {
       await axios.post("http://localhost:3001/api/event/", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
-          userid: userId,
+          userId: userId,
         },
       });
       setIsSuccess(true);
@@ -182,7 +182,7 @@ const CreateEventForm = () => {
   };
 
   const handleRsvp = async (eventId) => {
-    const userId = localStorage.getItem("userID");
+    const userId = localStorage.getItem("userId");
     if (!userId) {
       setError("User not authenticated");
       return;
@@ -195,7 +195,7 @@ const CreateEventForm = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            userid: userId,
+            userId: userId,
           },
         }
       );
@@ -215,9 +215,9 @@ const CreateEventForm = () => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [userId, setUserID] = useState("");
+  const [userId, setuserId] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [allUserIds, setAllUserIds] = useState([]);
+  const [alluserIds, setAlluserIds] = useState([]);
   const [userData, setUserData] = useState(null);
 
   const [groupBar, setGroupBar] = useState(false);
@@ -264,12 +264,12 @@ const CreateEventForm = () => {
               `http://localhost:3001/api/auth/user/${user.email}`
             );
             setIsRegistered(response.data.exists);
-            setUserID(response.data.userId);
-            localStorage.setItem("userID", response.data.userId);
+            setuserId(response.data.userId);
+            localStorage.setItem("userId", response.data.userId);
             const usersResponse = await axios.get(
               "http://localhost:3001/api/auth/users"
             );
-            setAllUserIds(usersResponse.data);
+            setAlluserIds(usersResponse.data);
             console.log("alluserIds", usersResponse.data);
             console.log("userId", response.data.userId);
           } catch (error) {
@@ -292,7 +292,7 @@ const CreateEventForm = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem("userID");
+      localStorage.removeItem("userId");
       setIsAuthenticated(false);
       setIsRegistered(false);
       router.push("/auth");
@@ -712,7 +712,7 @@ const CreateEventForm = () => {
                 <button className="close-btn" onClick={closeChat}>
                   X
                 </button>
-                <StreamChatComponent userId={userId} allUserIds={allUserIds} />
+                <StreamChatComponent userId={userId} alluserIds={alluserIds} />
               </div>
               <div className="backdrop" onClick={closeChat} />
             </div>

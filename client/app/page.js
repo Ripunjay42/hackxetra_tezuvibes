@@ -45,68 +45,38 @@ const HomePage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserID] = useState("");
+  const [userId, setuserId] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [allUserIds, setAllUserIds] = useState([]);
   const [userData, setUserData] = useState(null);
-  const userID = localStorage.getItem("userId");
   const [data, setData] = useState({ groups: [], clubs: [] });
   const [error, setError] = useState(null);
   const [groupBar, setGroupBar] = useState(false);
 
-  const post = localStorage.getItem("post");
-  const followers = localStorage.getItem("followers");
+  const [post, setPost] = useState(0);
+  const [followers, setFollowers] = useState(0);
 
-  function generateRandomNumber(limit) {
-    return Math.floor(Math.random() * limit);
-  }
-  console.log(userID);
-  // Fetch data from API
   // Fetch data from API
   const fetchData = async () => {
     try {
-      const url = `http://localhost:3001/api/user/${userID}/data`;
-      console.log(url);
-      const response = await fetch(
-        // "http://localhost:3001/api/user/ba22c7f8-dcbd-444b-96a3-d23648524e55/data"
-        url
-      );
+      const url = `http://localhost:3001/api/user/${userId}/data`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
       const result = await response.json();
       setData(result);
-      console.log(result);
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Use useEffect to call fetchData once when component mounts
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  // Define the asynchronous function to fetch user data
   const fetchUserData = async () => {
     try {
-      // Usage example:
-      // console.log(generateRandomNumber()); // Outputs a random number between 0 and 15
-      // Set "post" if it doesn't exist
-      if (localStorage.getItem("post") === null) {
-        localStorage.setItem("post", generateRandomNumber(4));
-      }
-
-      // Set "followers" if it doesn't exist
-      if (localStorage.getItem("followers") === null) {
-        localStorage.setItem("followers", generateRandomNumber(16));
-      }
-
       const response = await axios.get(
         `http://localhost:3001/api/auth/usersInfo/${userId}`
       );
-      setUserData(response.data.users[0]); // Store fetched data in state
-      console.log(response.data.users[0]);
+      setUserData(response.data.users[0]);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -123,14 +93,11 @@ const HomePage = () => {
               `http://localhost:3001/api/auth/user/${user.email}`
             );
             setIsRegistered(response.data.exists);
-            setUserID(response.data.userId);
-            localStorage.setItem("userId", response.data.userId);
+            setuserId(response.data.userId);
             const usersResponse = await axios.get(
               "http://localhost:3001/api/auth/users"
             );
             setAllUserIds(usersResponse.data);
-            console.log("alluserIds", usersResponse.data);
-            console.log("userId", response.data.userId);
           } catch (error) {
             console.error("Error checking registration status:", error);
           }
@@ -144,14 +111,21 @@ const HomePage = () => {
     };
 
     checkAuthStatus();
-    // Call the function on component load
     fetchUserData();
   }, [router, userId]);
+
+  useEffect(() => {
+    // Access localStorage only in the client-side
+    const post = localStorage.getItem("post");
+    const followers = localStorage.getItem("followers");
+    setPost(post ? parseInt(post) : 0);
+    setFollowers(followers ? parseInt(followers) : 0);
+  }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem("userID");
+      localStorage.removeItem("userId");
       setIsAuthenticated(false);
       setIsRegistered(false);
       router.push("/auth");
@@ -183,7 +157,6 @@ const HomePage = () => {
             setGroupBar={setGroupBar}
             groupBar={groupBar}
           />
-          {/* <Dashboard/> */}
           <div className="w-full h-full flex flex-row gap-4 p-4 bg-slate-100">
             <div className="basis-1/4 flex flex-col gap-4">
               <div className="flex flex-col p-4 bg-white rounded-lg ">
@@ -194,18 +167,13 @@ const HomePage = () => {
                     alt="profile pic"
                   />
                 </div>
-                {/* profile name */}
                 <h3 className="text-center font-bold text-lg">
                   {userData?.firstName} {userData?.lastName}
                 </h3>
-                {/* username */}
                 <h4 className="text-center font-normal text-sm text-gray-400">
                   @{userData?.username}
                 </h4>
-                {/* bio */}
                 <p className="text-center text-base">{userData?.bio}</p>
-                {/* friends counter */}
-                {/* post counter */}
                 <div className="flex flex-row text-center bg-slate-100 p-4 my-4 rounded-lg divide-x">
                   <div className="basis-1/2 ">
                     <span className="text-xl font-extrabold">{post}</span>
@@ -218,8 +186,6 @@ const HomePage = () => {
                     followers
                   </div>
                 </div>
-                {/* my profile button  */}
-
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button>My Profile</Button>
@@ -249,7 +215,6 @@ const HomePage = () => {
                               />
                             </div>
                           </div>
-
                           <div className="relative flex items-center">
                             <FaUserTag className="absolute left-2 text-gray-400" />
                             <input
@@ -259,7 +224,6 @@ const HomePage = () => {
                               placeholder="Username"
                             />
                           </div>
-
                           <div className="relative flex items-center">
                             <FaEnvelope className="absolute left-2 text-gray-400" />
                             <input
@@ -269,7 +233,6 @@ const HomePage = () => {
                               placeholder="Email"
                             />
                           </div>
-
                           <div className="relative flex items-center">
                             <FaPhone className="absolute left-2 text-gray-400" />
                             <input
@@ -279,7 +242,6 @@ const HomePage = () => {
                               placeholder="Phone Number"
                             />
                           </div>
-
                           <div className="relative flex items-center">
                             <FaInfoCircle className="absolute left-2 text-gray-400" />
                             <input
@@ -294,8 +256,6 @@ const HomePage = () => {
                     </DialogHeader>
                   </DialogContent>
                 </Dialog>
-
-                <div></div>
               </div>
               <div className="flex flex-col p-4 bg-white rounded-lg gap-4">
                 <h3 className=" font-bold text-lg">Your Upcoming Events</h3>
@@ -303,20 +263,15 @@ const HomePage = () => {
                 <ScrollArea className="h-[250px] w-100">
                   <GroupClubList />
                 </ScrollArea>
-                {/* view all button  */}
                 <div className="w-100 flex flex-row justify-between gap-4">
                   <Button className="basis-1/2">View All</Button>
                   <Button className="basis-1/2">Create New</Button>
                 </div>
               </div>
             </div>
-            {/*  */}
             <div className="basis-1/2 divide-y">
-              {" "}
               <PostFeed userId={userId} />
             </div>
-
-            {/*  */}
             {groupBar && (
               <div className="basis-1/4 ">
                 <div className="bg-white rounded-lg p-4">
@@ -341,16 +296,11 @@ const HomePage = () => {
                               </DialogHeader>
                             </DialogContent>
                           </Dialog>
-                          {/* Map data ot it and Pass props to this component to render the list of the  */}
-
                           <ScrollArea className="h-[300px] w-100">
                             <div className="flex flex-col gap-4">
                               {error && (
                                 <p className="text-red-500">Error: {error}</p>
                               )}
-
-                              {/* Render Groups */}
-
                               {data.groups.length ? (
                                 data.groups.map((group) => (
                                   <div
@@ -374,7 +324,6 @@ const HomePage = () => {
                                 <p>No groups found</p>
                               )}
                             </div>
-                            {/* <GroupClubList /> */}
                           </ScrollArea>
                         </div>
                       </Card>
@@ -395,16 +344,12 @@ const HomePage = () => {
                               </DialogHeader>
                             </DialogContent>
                           </Dialog>
-                          {/* Map data ot it and Pass props to this component to render the list of the  */}
                           <ScrollArea className="h-[250px] w-100">
                             <GroupClubList />
                             <div className="flex flex-col gap-4">
                               {error && (
                                 <p className="text-red-500">Error: {error}</p>
                               )}
-
-                              {/* Render Groups */}
-
                               {data.groups.length ? (
                                 data.groups.map((group) => (
                                   <div
@@ -429,9 +374,7 @@ const HomePage = () => {
                               )}
                             </div>
                           </ScrollArea>
-
                           <h3 className=" font-bold text-lg">Groups & Clubs</h3>
-                          {/* Map data ot it and Pass props to this component to render the list of the  */}
                           <ScrollArea className="h-[250px] w-100">
                             <GroupClubList />
                           </ScrollArea>
@@ -443,10 +386,8 @@ const HomePage = () => {
               </div>
             )}
           </div>
-
           {isChatOpen && (
             <>
-              chat
               <div className="chat-overlay">
                 <div className="chat-popup">
                   <button className="close-btn" onClick={closeChat}>

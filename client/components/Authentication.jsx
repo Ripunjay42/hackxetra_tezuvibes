@@ -29,7 +29,7 @@ const Authentication = () => {
   const [authData, setAuthData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userID, setUserID] = useState("");
+  const [userId, setUserId] = useState("");
 
   const isValidTezoEmail = (email) => {
     return email.toLowerCase().endsWith("@tezu.ac.in");
@@ -114,7 +114,7 @@ const Authentication = () => {
       `http://localhost:3001/api/auth/user/${user.email}`
     );
     if (response.data.exists) {
-      localStorage.setItem("userID", response.data.userId);
+      localStorage.setItem("userId", response.data.userId);
       router.push("/dashboard");
     } else {
       const queryParams = new URLSearchParams({

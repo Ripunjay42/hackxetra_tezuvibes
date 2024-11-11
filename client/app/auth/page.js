@@ -18,7 +18,7 @@ const AuthFlow = () => {
   const [authData, setAuthData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userID, setUserID] = useState("");
+  const [userId, setuserId] = useState("");
   const [clicked, setClicked] = useState(false);
   const isValidTezoEmail = (email) => {
     return email.toLowerCase().endsWith("@tezu.ac.in");
@@ -103,7 +103,7 @@ const AuthFlow = () => {
       `http://localhost:3001/api/auth/user/${user.email}`
     );
     if (response.data.exists) {
-      localStorage.setItem("userID", response.data.userId);
+      localStorage.setItem("userId", response.data.userId);
       localStorage.setItem("userId", response.data.userId);
       router.push("/");
     } else {

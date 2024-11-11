@@ -65,8 +65,6 @@ exports.getAllUserIds = async (req, res) => {
 
 exports.getAllUserInfo = async (req, res) => {
   const { userId } = req.params; // Corrected to req.params
-  console.log(userId); // Log userId for debugging
-
   db.any('SELECT id, "email", "firstName", "lastName", "phoneNumber", bio, username FROM "User" WHERE id = $1', [userId])
     .then((data) => {
       res.json({ users: data });

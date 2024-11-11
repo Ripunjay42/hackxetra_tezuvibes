@@ -30,7 +30,7 @@ import PostFeed from "@/components/Postfeed";
 
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const userID = localStorage.getItem("userID");
+  const userId = localStorage.getItem("userId");
   const [data, setData] = useState({ groups: [], clubs: [] });
   const [error, setError] = useState(null);
 
@@ -39,7 +39,7 @@ const Dashboard = () => {
     try {
       const response = await fetch(
         // "http://localhost:3001/api/user/ba22c7f8-dcbd-444b-96a3-d23648524e55/data"
-        "http://localhost:3001/api/user/" + userID + "/data"
+        "http://localhost:3001/api/user/" + userId + "/data"
       );
       if (!response.ok) {
         throw new Error("Failed to fetch data");

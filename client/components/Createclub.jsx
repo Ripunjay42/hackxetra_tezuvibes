@@ -22,7 +22,7 @@ const Createclub = () => {
   };
 
   const handleFileChange = async (e, fieldName) => {
-    const userId = localStorage.getItem("userID");
+    const userId = localStorage.getItem("userId");
     const file = e.target.files[0];
     if (file) {
       try {
@@ -63,7 +63,7 @@ const Createclub = () => {
     try {
       const response = await axios.post(
         `http://localhost:3001/api/clubs/club/create`,
-        { ...formData, userId: localStorage.getItem("userID") },
+        { ...formData, userId: localStorage.getItem("userId") },
         {
           headers: {
             "Content-Type": "application/json",

@@ -3,7 +3,6 @@ const prisma = require("../db/index");
 // Create a new group
 const createGroup = async (req, res) => {
   const { name, description, userId } = req.body;
-  console.log(req.body);
   try {
     const newGroup = await prisma.Group.create({
       data: {
